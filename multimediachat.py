@@ -1,8 +1,9 @@
 import streamlit as st
 import google.generativeai as genai
 from pypdf import PdfReader
-import fitz, time
+import os, fitz, PIL.Image, time
 from io import BytesIO
+import tempfile
 
 # Configure Google API key using Streamlit secrets
 GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY_NEW"]
@@ -81,8 +82,11 @@ def main():
     elif typepdf == "Images":
         image_file = st.file_uploader("Upload your image file.")
         if image_file:
-            image_data = image_file.read()
-            image_file = genai.upload_file(path=image_data)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+                temp_file.write(image_file.read())
+                temp_file_path = temp_file.name
+
+            image_file = genai.upload_file(path=temp_file_path)
             
             while image_file.state.name == "PROCESSING":
                 time.sleep(10)
@@ -108,8 +112,11 @@ def main():
     elif typepdf == "Video, mp4 file":
         video_file = st.file_uploader("Upload your video")
         if video_file:
-            video_data = video_file.read()
-            video_file = genai.upload_file(path=video_data)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
+                temp_file.write(video_file.read())
+                temp_file_path = temp_file.name
+
+            video_file = genai.upload_file(path=temp_file_path)
             
             while video_file.state.name == "PROCESSING":
                 time.sleep(10)
@@ -131,8 +138,11 @@ def main():
     elif typepdf == "Audio files":
         audio_file = st.file_uploader("Upload your audio")
         if audio_file:
-            audio_data = audio_file.read()
-            audio_file = genai.upload_file(path=audio_data)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+                temp_file.write(audio_file.read())
+                temp_file_path = temp_file.name
+
+            audio_file = genai.upload_file(path=temp_file_path)
 
             while audio_file.state.name == "PROCESSING":
                 time.sleep(10)
